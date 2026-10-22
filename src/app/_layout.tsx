@@ -1,18 +1,62 @@
-import {Tabs} from "expo-router"; //Tipo de navegacion 
-import {QueryClient,QueryClientProvider} from "@tanstack/react-query";//configuracion y provedor de queries
+import React from "react";
+import { Tabs } from "expo-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import { PT } from "../constants/patiotuerca";
 
-const qc = new QueryClient() //Este bjeto administra el cache de la vida de querys
-//Componente Layout para envolver la navegacion dentro del Query cliente provider
-//Con esto todos los componentes hijos pueden usar useQuery y useMutation
-//Este es el punto de integracion entre tnstackQuery y la navegacion de Expo Router
+const qc = new QueryClient();
 
 export default function Layout() {
   return (
     <QueryClientProvider client={qc}>
-      <Tabs>
-        <Tabs.Screen name="index" options={{title: "Home"}} />
-        <Tabs.Screen name="explore" options={{title: "Explore"}} />
+      <StatusBar style="dark" />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: PT.colors.primary,
+          tabBarInactiveTintColor: PT.colors.textMuted,
+          tabBarStyle: {
+            backgroundColor: PT.colors.surface,
+            borderTopColor: PT.colors.border,
+            borderTopWidth: 1,
+            height: 62,
+            paddingBottom: 8,
+            paddingTop: 6,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
+        }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Inventario",
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? "car-sport" : "car-sport-outline"}
+                size={size ?? 22}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="explore"
+          options={{
+            title: "Explorar",
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? "search" : "search-outline"}
+                size={size ?? 22}
+                color={color}
+              />
+            ),
+          }}
+        />
       </Tabs>
     </QueryClientProvider>
-  )
+  );
 }

@@ -1,32 +1,63 @@
-// importamos los hooks de time stack query
-//useQuery para consultas get
-//useMutation para consultas post, put, delete
-//useQueryCliente: Interactuar con la cache , invalidar refresacar
-import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query"
-import {Carro} from "../types/carro"
-import {carrosService} from "../api/carros.service"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Alert } from "react-native";
+import { Carro } from "../types/carro";
+import { carrosService } from "../api/carros.service";
 
-//Definir constante key que servirá como identificador único para las Querys relacionadas con carros
-const KEY = ["carros"]
+const KEY = ["carros"];
 
 export function useCarros() {
-    return useQuery({
-        queryKey: ["carros"],
-        queryFn: () => {
-            console.log("Get ejecutado con axios desde hook useCarros.ts")
-            return carrosService.getAll()},
-        staleTime: 1000 * 60 * 5, //Significa cuanto tiemo los datos se consideran Frescos
-    })
+  return useQuery({
+    queryKey: KEY,
+    queryFn: () => carrosService.getAll(),
+    staleTime: 1000 * 60 * 5,
+  });
 }
 
-//Hook personalizado para agregar un nuevo carro y encapsula la logica de agregar un carro nuevo
-// Usa useMutation con mutationFn que llama a carrosService.sdd()
-//onSuccess: invalidar la query de carros para que se refresque la lista de carros despues de agregar uno nuevo
-
 export function useAgregarCarro() {
-    const qc = useQueryClient()
-    return useMutation({
-        mutationFn: (marca: string) => carrosService.add(marca),
-        onSuccess: () => qc.invalidateQueries({queryKey: KEY})  
-    })
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (carro: Omit<Carro, "id"> | { marca: string } | string) =>
+      carrosService.add(carro),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useActualizarCarro() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (carro: Carro) => carrosService.update(carro),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useEliminarCarro() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => carrosService.delete(id),
+    onMutate: async (id: string) => {
+      await qc.cancelQueries({ queryKey: KEY });
+      const previousCarros = qc.getQueryData<Carro[]>(KEY);
+
+      qc.setQueryData<Carro[]>(KEY, (old) => {
+        return old ? old.filter((carro) => carro.id !== id) : [];
+      });
+
+      return { previousCarros };
+    },
+    onSuccess: () => {
+      Alert.alert("Éxito", "Carro eliminado con éxito");
+    },
+    onError: (err, id, context) => {
+      if (context?.previousCarros) {
+        qc.setQueryData(KEY, context.previousCarros);
+      }
+      Alert.alert(
+        "Error al eliminar",
+        "No fue posible eliminar el carro en el servidor. Se ha restaurado en la lista."
+      );
+    },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: KEY });
+    },
+  });
 }
