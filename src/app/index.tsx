@@ -2,228 +2,228 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
-  Alert,
-  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-import { Carro } from "../types/carro";
-import { useCarros, useAgregarCarro } from "../hooks/useCarros";
-import { CarroCard } from "../components/CarroCard";
-import { CarroForm } from "../components/CarroForm";
-import { PT } from "../constants/patiotuerca";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useWeather } from "../hooks/useWeather";
+import { useUbicaciones } from "../hooks/useUbicaciones";
+import { DEFAULT_LOCATIONS } from "../constants/defaultLocations";
+import { OfflineBanner } from "../components/common/OfflineBanner";
+import { WeatherHeroCard } from "../components/weather/WeatherHeroCard";
+import { WeatherHourlyChart } from "../components/weather/WeatherHourlyChart";
+import { Theme } from "../constants/theme";
 
-export default function App() {
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const { data: carros = [], isLoading, error } = useCarros();
-  const { mutate: agregarCarro, isPending: isAdding } = useAgregarCarro();
+export default function WeatherScreen() {
+  const params = useLocalSearchParams<{ lat?: string; lon?: string; nombre?: string }>();
 
-  const handleCrearCarro = (nuevoCarro: Carro) => {
-    const { id, ...payload } = nuevoCarro;
+  const paramsKey = `${params.lat ?? ""}-${params.lon ?? ""}`;
 
-    agregarCarro(payload, {
-      onSuccess: () => {
-        Alert.alert("Éxito", "Carro registrado con éxito");
-        setMostrarFormulario(false);
-      },
-      onError: (err) => {
-        Alert.alert("Error", err.message || "No se pudo registrar el carro");
-      },
-    });
-  };
+  const { data: ubicaciones = [] } = useUbicaciones();
 
-  if (isLoading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={PT.colors.primary} />
-        <Text style={styles.loadingText}>Cargando inventario...</Text>
-      </View>
-    );
-  }
+  const [ultimaBusqueda, setUltimaBusqueda] = useState<{
+    lat: number;
+    lon: number;
+    nombre: string;
+    sourceParamsKey: string;
+  } | null>(null);
 
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorTitle}>Error al sincronizar datos</Text>
-        <Text style={styles.errorSub}>{error.message}</Text>
-      </View>
-    );
-  }
+  const tieneBusquedaManual = ultimaBusqueda !== null && ultimaBusqueda.sourceParamsKey === paramsKey;
+
+  const latitud = tieneBusquedaManual
+    ? ultimaBusqueda.lat
+    : params.lat
+    ? parseFloat(params.lat)
+    : DEFAULT_LOCATIONS[0].latitud;
+
+  const longitud = tieneBusquedaManual
+    ? ultimaBusqueda.lon
+    : params.lon
+    ? parseFloat(params.lon)
+    : DEFAULT_LOCATIONS[0].longitud;
+
+  const nombreLugar = tieneBusquedaManual
+    ? ultimaBusqueda.nombre
+    : params.nombre ?? DEFAULT_LOCATIONS[0].nombre;
+
+  const { data: pronostico, isLoading, isFetching, isError, refetch } = useWeather(latitud, longitud);
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={carros}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <CarroCard carro={item} />}
-        ListHeaderComponent={
-          <View style={styles.headerContainer}>
-            <View style={styles.brandBar}>
-              <Text style={styles.brandTitle}>
-                PATIO<Text style={styles.brandAccent}>TUERCA</Text>
-              </Text>
-              <Text style={styles.brandSubtitle}>Catálogo y Gestión Vehicular</Text>
-            </View>
+    <View style={styles.safeArea}>
+      <OfflineBanner />
 
-            {mostrarFormulario ? (
-              <View style={styles.formWrapper}>
-                <View style={styles.formHeaderRow}>
-                  <Text style={styles.formHeading}>Registrar Nuevo Vehículo</Text>
-                  <View style={styles.nuevoBadge}>
-                    <Text style={styles.nuevoBadgeText}>NUEVO</Text>
-                  </View>
-                </View>
-                <CarroForm
-                  onSubmit={handleCrearCarro}
-                  onCancel={() => setMostrarFormulario(false)}
-                  textoBoton="Publicar Vehículo"
-                  isSubmittingExterno={isAdding}
-                />
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={styles.btnNuevo}
-                onPress={() => setMostrarFormulario(true)}
-              >
-                <Text style={styles.btnNuevoTexto}>+ Publicar Nuevo Vehículo</Text>
-              </TouchableOpacity>
-            )}
+      <View style={styles.header}>
+        <Text style={styles.titulo}>EPN Rain</Text>
+      </View>
 
-            <View style={styles.inventoryRow}>
-              <Text style={styles.sectionSubtitle}>Autos Disponibles</Text>
-              <Text style={styles.counterBadge}>{carros.length} unidades</Text>
-            </View>
-          </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={() => refetch()}
+            colors={[Theme.colors.primary]}
+            tintColor={Theme.colors.primary}
+          />
         }
-        contentContainerStyle={styles.listContent}
-      />
+      >
+        <View style={styles.selectorContainer}>
+          <Text style={styles.selectorLabel}>Mis Ubicaciones</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.presetsRow}>
+            {DEFAULT_LOCATIONS.map((preset) => {
+              const activa = Math.abs(preset.latitud - latitud) < 0.001 && Math.abs(preset.longitud - longitud) < 0.001;
+              return (
+                <TouchableOpacity
+                  key={preset.nombre}
+                  style={[styles.chip, activa && styles.chipActiva]}
+                  onPress={() => setUltimaBusqueda({ lat: preset.latitud, lon: preset.longitud, nombre: preset.nombre, sourceParamsKey: paramsKey })}
+                >
+                  <Ionicons name="location" size={12} color={activa ? "#FFFFFF" : Theme.colors.primary} />
+                  <Text style={[styles.chipText, activa && styles.chipTextActiva]}>{preset.nombre}</Text>
+                </TouchableOpacity>
+              );
+            })}
+
+            {ubicaciones.map((ubicacion) => {
+              const activa = Math.abs(ubicacion.latitud - latitud) < 0.001 && Math.abs(ubicacion.longitud - longitud) < 0.001;
+              return (
+                <TouchableOpacity
+                  key={ubicacion.id}
+                  style={[styles.chip, activa && styles.chipActiva]}
+                  onPress={() => setUltimaBusqueda({ lat: ubicacion.latitud, lon: ubicacion.longitud, nombre: ubicacion.nombre, sourceParamsKey: paramsKey })}
+                >
+                  <Ionicons name="bookmark" size={12} color={activa ? "#FFFFFF" : Theme.colors.primary} />
+                  <Text style={[styles.chipText, activa && styles.chipTextActiva]}>{ubicacion.nombre}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {isLoading && !pronostico ? (
+          <View style={styles.centerLoading}>
+            <ActivityIndicator size="large" color={Theme.colors.primary} />
+            <Text style={styles.loadingText}>Cargando datos del clima...</Text>
+          </View>
+        ) : isError && !pronostico ? (
+          <View style={styles.centerError}>
+            <Text style={styles.errorText}>No se pudo cargar el clima.</Text>
+            <Text style={styles.errorSubtext}>Verifica tu conexión a internet o intenta de nuevo.</Text>
+          </View>
+        ) : (
+          <>
+            <WeatherHeroCard
+              actual={pronostico?.actual}
+              nombreCiudad={nombreLugar}
+              lat={latitud}
+              lon={longitud}
+            />
+
+            {pronostico?.porHora && pronostico.porHora.length > 0 && (
+              <WeatherHourlyChart horas={pronostico.porHora} />
+            )}
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: PT.colors.background,
+    backgroundColor: Theme.colors.background,
   },
-  listContent: {
-    paddingBottom: 30,
-  },
-  headerContainer: {
-    paddingTop: 45,
+  header: {
     paddingHorizontal: 16,
+    paddingTop: 36,
     paddingBottom: 8,
   },
-  brandBar: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  brandTitle: {
-    fontSize: 22,
+  titulo: {
+    fontSize: 28,
     fontWeight: "800",
-    color: PT.colors.textMain,
-    letterSpacing: 1,
+    color: Theme.colors.textMain,
+    textAlign: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: Theme.colors.border,
+    opacity: 0.80,
   },
-  brandAccent: {
-    color: PT.colors.primary,
-  },
-  brandSubtitle: {
+  subtitulo: {
     fontSize: 12,
-    color: PT.colors.textMuted,
+    color: Theme.colors.textMuted,
     marginTop: 2,
-    fontWeight: "400",
-  },
-  btnNuevo: {
-    backgroundColor: PT.colors.primary,
-    paddingVertical: 12,
-    borderRadius: PT.radius.button,
-    alignItems: "center",
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  btnNuevoTexto: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  formWrapper: {
-    backgroundColor: PT.colors.surface,
-    borderRadius: PT.radius.widget,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: PT.colors.border,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  formHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  formHeading: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: PT.colors.textMain,
-  },
-  nuevoBadge: {
-    backgroundColor: PT.colors.badgeBlue,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: PT.radius.badge,
-  },
-  nuevoBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "700",
-  },
-  inventoryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 4,
-    marginBottom: 8,
-  },
-  sectionSubtitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: PT.colors.textMain,
-  },
-  counterBadge: {
-    fontSize: 12,
-    color: PT.colors.textMuted,
     fontWeight: "500",
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
+  selectorContainer: {
+    marginHorizontal: 16,
+    marginVertical: 6,
+  },
+  selectorLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: Theme.colors.textMain,
+    marginBottom: 6,
+  },
+  presetsRow: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+  chip: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: PT.colors.background,
-    padding: 20,
+    gap: 4,
+    backgroundColor: Theme.colors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: Theme.radius.full,
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+  },
+  chipActiva: {
+    backgroundColor: Theme.colors.primary,
+    borderColor: Theme.colors.primary,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Theme.colors.textMain,
+  },
+  chipTextActiva: {
+    color: "#FFFFFF",
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
+  centerLoading: {
+    paddingVertical: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 10,
     fontSize: 14,
-    color: PT.colors.textMuted,
+    color: Theme.colors.textMuted,
   },
-  errorTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: PT.colors.error,
-    marginBottom: 4,
+  centerError: {
+    padding: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  errorSub: {
+  errorText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: Theme.colors.accentRed,
+  },
+  errorSubtext: {
     fontSize: 13,
-    color: PT.colors.textMuted,
+    color: Theme.colors.textMuted,
+    marginTop: 4,
     textAlign: "center",
   },
 });

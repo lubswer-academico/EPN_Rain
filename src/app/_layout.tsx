@@ -1,26 +1,45 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { StatusBar } from "expo-status-bar";
+import { StatusBar, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { PT } from "../constants/patiotuerca";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import {
+  queryClient,
+  asyncStoragePersister,
+  MAX_AGE_PERSISTENCIA,
+} from "../config/queryClient";
+import { configurarOnlineManager } from "../config/onlineManager";
+import { Theme } from "../constants/theme";
 
-const qc = new QueryClient();
+configurarOnlineManager();
 
-export default function Layout() {
+export default function RootLayout() {
   return (
-    <QueryClientProvider client={qc}>
-      <StatusBar style="dark" />
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: asyncStoragePersister,
+        maxAge: MAX_AGE_PERSISTENCIA,
+      }}
+      onSuccess={() => {
+        queryClient.resumePausedMutations();
+      }}
+    >
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: PT.colors.primary,
-          tabBarInactiveTintColor: PT.colors.textMuted,
+          tabBarActiveTintColor: Theme.colors.primary,
+          tabBarInactiveTintColor: Theme.colors.textMuted,
           tabBarStyle: {
-            backgroundColor: PT.colors.surface,
-            borderTopColor: PT.colors.border,
+            backgroundColor: Theme.colors.surface,
+            borderTopColor: Theme.colors.border,
             borderTopWidth: 1,
-            height: 62,
+            height: 60,
             paddingBottom: 8,
             paddingTop: 6,
           },
@@ -33,30 +52,30 @@ export default function Layout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Inventario",
+            title: "Clima",
             tabBarIcon: ({ color, size, focused }) => (
               <Ionicons
-                name={focused ? "car-sport" : "car-sport-outline"}
-                size={size ?? 22}
+                name={focused ? "partly-sunny" : "partly-sunny-outline"}
+                size={size}
                 color={color}
               />
             ),
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="ubicaciones"
           options={{
-            title: "Explorar",
+            title: "Mis Ubicaciones",
             tabBarIcon: ({ color, size, focused }) => (
               <Ionicons
-                name={focused ? "search" : "search-outline"}
-                size={size ?? 22}
+                name={focused ? "location" : "location-outline"}
+                size={size}
                 color={color}
               />
             ),
           }}
         />
       </Tabs>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

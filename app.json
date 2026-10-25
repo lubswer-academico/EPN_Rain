@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "taller-carros",
-    "slug": "taller-carros",
+    "name": "Clima Meteo",
+    "slug": "clima-meteo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tallercarros",
+    "scheme": "climameteo",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -18,6 +18,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#00000000",
+      "barStyle": "dark-content",
+      "translucent": true
     },
     "web": {
       "output": "static",
