@@ -85,7 +85,7 @@ export function LocationCard({ ubicacion, onEditar, onEliminar }: Props) {
             onPress={() => onEliminar(ubicacion.id)}
             activeOpacity={0.7}
           >
-            <Ionicons name="trash-outline" size={15} color="#EF4444" />
+            <Ionicons name="trash-outline" size={15} color={Theme.colors.accentRed} />
           </TouchableOpacity>
         </View>
       </View>
@@ -102,15 +102,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: Theme.colors.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowColor: Theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   cardPendiente: {
     backgroundColor: "#FFFDF5",
-    borderColor: "#FDE68A",
+    borderColor: Theme.colors.accent,
   },
   contentRow: {
     flexDirection: "row",
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.primaryLight,
   },
   avatarPendiente: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: Theme.colors.badgePendingBg,
   },
   infoCol: {
     flex: 1,
@@ -178,12 +178,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     alignSelf: "flex-start",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: Theme.colors.background,
     paddingHorizontal: 7,
     paddingVertical: 2.5,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: Theme.colors.border,
   },
   coordsTexto: {
     fontSize: 11,
@@ -205,11 +205,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   btnEditar: {
-    backgroundColor: "#fafafaff",
-    borderColor: "#d6d5d5ff",
+    backgroundColor: Theme.colors.surface,
+    borderColor: Theme.colors.border,
   },
   btnEliminar: {
-    backgroundColor: "#fafafaff",
-    borderColor: "#d6d5d5ff",
+    backgroundColor: Theme.colors.surface,
+    borderColor: Theme.colors.border,
   },
 });

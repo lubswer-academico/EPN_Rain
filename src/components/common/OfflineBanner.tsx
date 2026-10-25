@@ -1,4 +1,3 @@
-// src/components/common/OfflineBanner.tsx
 import { Ionicons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
@@ -26,7 +25,7 @@ export function OfflineBanner() {
         color={Theme.colors.badgePendingText}
       />
       <Text style={styles.texto}>
-        Modo Sin Conexión: Mostrando datos desde la memoria caché
+        Modo Sin Conexión
       </Text>
     </View>
   );
@@ -38,8 +37,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 7,
     paddingHorizontal: 16,
+    paddingTop: 20,
     gap: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#FDE68A",

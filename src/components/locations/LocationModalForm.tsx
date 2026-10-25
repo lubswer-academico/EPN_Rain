@@ -113,7 +113,7 @@ export function LocationModalForm({
           <Text style={styles.label}>Nombre de la Ubicación *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej: Mi Casa, Oficina, Finca"
+            placeholder="Ej: Mi Casa"
             value={nombre}
             onChangeText={setNombre}
           />
@@ -148,7 +148,7 @@ export function LocationModalForm({
 
             <TouchableOpacity style={styles.btnSave} onPress={handleGuardar} disabled={guardando}>
               {guardando ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <ActivityIndicator color={Theme.colors.primary} size="small" />
               ) : (
                 <Text style={styles.btnSaveText}>
                   {ubicacionEditar ? "Actualizar" : "Guardar Ubicación"}
@@ -165,7 +165,7 @@ export function LocationModalForm({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.5)",
+    backgroundColor: "rgba(13, 28, 51, 0.6)",
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
@@ -176,6 +176,11 @@ const styles = StyleSheet.create({
     padding: 20,
     width: "100%",
     maxWidth: 380,
+    shadowColor: Theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
   },
   header: {
     flexDirection: "row",
@@ -234,7 +239,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   btnSave: {
-    backgroundColor: Theme.colors.primary,
+    backgroundColor: Theme.colors.accent,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: Theme.radius.sm,
@@ -242,7 +247,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnSaveText: {
-    color: "#FFFFFF",
+    color: Theme.colors.primary,
     fontWeight: "700",
     fontSize: 13,
   },

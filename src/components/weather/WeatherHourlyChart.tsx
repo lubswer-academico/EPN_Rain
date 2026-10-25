@@ -29,7 +29,7 @@ export function WeatherHourlyChart({ horas }: Props) {
   const datosLluvia = horas.map((item, index) => ({
     value: Math.min(100, Math.max(0, Math.round(item.probabilidadLluvia ?? 0))),
     label: index === 0 ? "Ahora" : formatHora(item.hora),
-    frontColor: (item.probabilidadLluvia ?? 0) > 40 ? Theme.colors.primary : "#93C5FD",
+    frontColor: (item.probabilidadLluvia ?? 0) > 40 ? Theme.colors.barPrimary : Theme.colors.barAccent,
     topLabelComponent: () => (
       <Text style={styles.topLabelBarra}>
         {Math.round(item.probabilidadLluvia ?? 0)}%
@@ -90,17 +90,17 @@ export function WeatherHourlyChart({ horas }: Props) {
             initialSpacing={20}
             color={Theme.colors.primary}
             thickness={2.5}
-            startFillColor="#0284C7"
-            endFillColor="#E0F2FE"
-            startOpacity={0.35}
-            endOpacity={0.05}
-            dataPointsColor={Theme.colors.primary}
+            startFillColor={Theme.colors.primary}
+            endFillColor={Theme.colors.primaryLight}
+            startOpacity={0.25}
+            endOpacity={0.03}
+            dataPointsColor={Theme.colors.accent}
             dataPointsRadius={4}
             hideRules={false}
-            rulesColor="#E2E8F0"
+            rulesColor={Theme.colors.border}
             rulesType="dashed"
-            yAxisColor="#CBD5E1"
-            xAxisColor="#CBD5E1"
+            yAxisColor={Theme.colors.border}
+            xAxisColor={Theme.colors.border}
             yAxisTextStyle={styles.ejeTexto}
             xAxisLabelTextStyle={styles.ejeTexto}
             yAxisOffset={Math.max(0, minTemp - 2)}
@@ -117,9 +117,9 @@ export function WeatherHourlyChart({ horas }: Props) {
             barBorderRadius={4}
             maxValue={100}
             noOfSections={4}
-            yAxisColor="#CBD5E1"
-            xAxisColor="#CBD5E1"
-            rulesColor="#E2E8F0"
+            yAxisColor={Theme.colors.border}
+            xAxisColor={Theme.colors.border}
+            rulesColor={Theme.colors.border}
             rulesType="dashed"
             yAxisTextStyle={styles.ejeTexto}
             xAxisLabelTextStyle={styles.ejeTexto}
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   pestanas: {
     flexDirection: "row",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: Theme.colors.primaryLight,
     borderRadius: Theme.radius.md,
     padding: 2,
     gap: 2,
@@ -241,6 +241,6 @@ const styles = StyleSheet.create({
   lluviaMini: {
     fontSize: 9,
     fontWeight: "600",
-    color: "#0284C7",
+    color: Theme.colors.accentText,
   },
 });

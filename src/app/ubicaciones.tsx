@@ -65,7 +65,7 @@ export default function UbicacionesScreen() {
           <Text style={styles.titulo}>Mis Ubicaciones</Text>
         </View>
         <TouchableOpacity style={styles.btnNuevo} onPress={handleAbrirCrear}>
-          <Ionicons name="add" size={18} color="#FFFFFF" />
+          <Ionicons name="add" size={18} color={Theme.colors.primary} />
           <Text style={styles.btnNuevoTexto}>Nueva</Text>
         </TouchableOpacity>
       </View>
@@ -112,7 +112,7 @@ export default function UbicacionesScreen() {
                 Guarda tus ciudades favoritas para consultar su clima rápidamente, incluso sin conexión.
               </Text>
               <TouchableOpacity style={styles.btnCrearPrimero} onPress={handleAbrirCrear}>
-                <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" />
+                <Ionicons name="add-circle-outline" size={18} color={Theme.colors.primary} />
                 <Text style={styles.btnCrearPrimeroTexto}>Agregar Primera Ubicación</Text>
               </TouchableOpacity>
             </View>
@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: Theme.colors.textMain,
-    opacity: 0.80,
   },
   subtitulo: {
     fontSize: 12,
@@ -165,13 +164,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: Theme.colors.primary,
+    backgroundColor: Theme.colors.accent,
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: Theme.radius.sm,
   },
   btnNuevoTexto: {
-    color: "#FFFFFF",
+    color: Theme.colors.primary,
     fontSize: 13,
     fontWeight: "700",
   },
@@ -239,14 +238,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: Theme.colors.primary,
+    backgroundColor: Theme.colors.accent,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: Theme.radius.md,
     marginTop: 16,
   },
   btnCrearPrimeroTexto: {
-    color: "#FFFFFF",
+    color: Theme.colors.primary,
     fontSize: 14,
     fontWeight: "700",
   },

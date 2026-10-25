@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   coordsText: {
     fontSize: 12,
-    color: Theme.colors.primaryLight,
+    color: "#E2E8F0",
   },
   centerRow: {
     flexDirection: "row",
@@ -86,8 +86,8 @@ const styles = StyleSheet.create({
   },
   conditionText: {
     fontSize: 16,
-    color: Theme.colors.primaryLight,
-    fontWeight: "600",
+    color: Theme.colors.accent,
+    fontWeight: "700",
   },
   footerRow: {
     flexDirection: "row",

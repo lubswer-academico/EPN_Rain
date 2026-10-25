@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderBottomWidth: 1,
     borderBottomColor: Theme.colors.border,
-    opacity: 0.80,
+
   },
   subtitulo: {
     fontSize: 12,
